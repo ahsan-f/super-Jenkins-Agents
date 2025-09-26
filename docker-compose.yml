@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  jenkins-controller:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.controller
+    container_name: jenkins-controller
+    ports:
+      - '8080:8080'
+      - '50000:50000'
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    networks:
+      - jenkins-network
+
+  jenkins-agent:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.agent
+    container_name: jenkins-agent
+    depends_on:
+      - jenkins-controller
+    environment:
+      - JENKINS_URL=http://jenkins-controller:8080
+      - JENKINS_SECRET= # You'll need to get this from the Jenkins UI
+      - JENKINS_AGENT_NAME=docker-agent
+    networks:
+      - jenkins-network
+
+networks:
+  jenkins-network:
+    driver: bridge
+
+volumes:
+  jenkins_home:

@@ -1,0 +1,21 @@
+# Use an official OpenJDK image with Java 21 as the base.
+FROM openjdk:21-jdk-slim
+
+# Set Jenkins versions and download URL.
+ARG JENKINS_VERSION=2.466.1
+ENV JENKINS_URL=https://updates.jenkins.io/download/war/2.466/jenkins.war
+
+# Set the working directory inside the container.
+WORKDIR /usr/local/jenkins
+
+# Download the Jenkins WAR file and install required dependencies.
+RUN apt-get update && apt-get install -y wget libfreetype6 fontconfig && \
+    wget -O jenkins.war ${JENKINS_URL} && \
+    rm -rf /var/lib/apt/lists/*
+
+# Expose the default Jenkins port for the web UI and a separate port for agents.
+EXPOSE 8080
+EXPOSE 50000
+
+# The command to run when the container starts.
+CMD ["java", "-Djava.awt.headless=true", "-jar", "jenkins.war"]
